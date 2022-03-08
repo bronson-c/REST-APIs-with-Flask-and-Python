@@ -1,5 +1,5 @@
 # REST-APIs-with-Flask-and-Python
-Code from Section 6 and onwards of the REST APIs with Flask and Python course on Udemy
+Code from Section 6 and onwards of the REST APIs with Flask and Python course on Udemy. Section 10 code is excluded as it requires the purchase of a domain name.
 
 The master branch is deployed on Heroku.
 
