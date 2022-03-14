@@ -21,6 +21,15 @@ def create_tables():
 
 jwt = JWTManager(app)
 
+
+@jwt.additional_claims_loader
+def add_claims_to_jwt(identity):
+    # ideally identity value should be gathered from a database of admin users, etc.
+    if identity == 1:
+        return{'is_admin': True}
+    return{'is_admin': False}
+
+
 api.add_resource(Store, '/store/<string:name>')
 api.add_resource(StoreList, '/stores')
 api.add_resource(Item, '/item/<string:name>')
