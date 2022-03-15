@@ -23,6 +23,7 @@ class Item(Resource):
             return item.json()
         return {'message': 'Item not found'}, 404
 
+    @jwt_required(fresh=True)
     def post(self, name):
         if ItemModel.find_by_name(name):
             return {'message': "An item with name '{}' already exists.".format(name)}, 400
@@ -38,7 +39,7 @@ class Item(Resource):
 
         return item.json(), 201
 
-    @jwt_required()
+    @jwt_required(fresh=True)
     def delete(self, name):
         claims = get_jwt()
         if not claims['is_admin']:
