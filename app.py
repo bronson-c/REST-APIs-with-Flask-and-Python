@@ -6,11 +6,14 @@ from flask_jwt_extended import JWTManager
 from resources.user import UserRegister, User, UserLogin, TokenRefresh
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
+from blocklist import BLOCKLIST
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
+app.config['JWT_BLOCKLIST_ENABLED'] = True
+app.config['JWT_BLOCKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 app.secret_key = 'key'  # can add app.config['JWT_SECRET_KEY'] if desired
 api = Api(app)
 
@@ -31,8 +34,13 @@ def add_claims_to_jwt(identity):
     return{'is_admin': False}
 
 
+@jwt.token_in_blocklist_loader
+def check_blocklist(_decrypted_header, decrypted_token):
+    return decrypted_token['sub'] in BLOCKLIST
+
+
 @jwt.expired_token_loader
-def expired_token_callback(jwt_header, jwt_payload):
+def expired_token_callback(_decrypted_header, _decrypted_body):
     return jsonify({
         'description': 'The token has expired.',
         'error': 'token_expired'
@@ -56,7 +64,7 @@ def missing_token_callback(error):
 
 
 @jwt.needs_fresh_token_loader
-def stale_token_callback(jwt_header, jwt_payload):
+def stale_token_callback(_decrypted_header, _decrypted_body):
     return jsonify({
         'description': 'The access token is not fresh',
         'error': 'fresh_token_required'
@@ -64,7 +72,7 @@ def stale_token_callback(jwt_header, jwt_payload):
 
 
 @jwt.revoked_token_loader
-def revoked_token_callback(jwt_header, jwt_payload):
+def revoked_token_callback(_decrypted_header, _decrypted_body):
     return jsonify({
         'description': 'The access token ihas been revoked',
         'error': 'token_revoked'
